@@ -4,18 +4,38 @@ This repository kicks off the research vision Jan outlined: blend SciML-style so
 
 ## Research goals
 
-1. **Story-driven simulation dashboard** – Use deterministic ODE/PDE solvers to model latent aligner dynamics and wrap them in a narrative layer (notes, convergence insights, next-action suggestions).
-2. **SciML-informed surrogate models** – Couple DifferentialEquations.jl-style solvers or components with data-driven residual corrections (like DA-SHRED) so the simulator learns from Cheap2Rich’s contrastive/SINDy runs.
-3. **Experiment foresight** – Forecast how parameter tweaks or data refinements affect SSIM/latent metrics, then present the implications as short narratives for Jan’s site.
+1. **Story-driven simulation dashboard** – Use deterministic solvers to model latent aligner dynamics and wrap them in a narrative layer (notes, convergence insights, next-action suggestions).
+2. **SciML-informed surrogate models** – Couple DifferentialEquations.jl-style solvers with data-driven residual corrections (like DA-SHRED) so the simulator learns from contrastive SINDy runs.
+3. **Experiment foresight** – Forecast how parameter tweaks or data refinements affect SSIM/latent metrics, then deliver those insights back to Jan’s personal site as short stories or warnings.
 
 ## Strategy
 
-- Start by documenting the latent alignment pipeline from `Cheap2Rich.py` and identify the parts that can map to ODEs (e.g., latent drift, gating dynamics, frequency attention).  
-- Prototype a small Julia/Python hybrid where SciML solvers estimate how a latent evolves under frequency gating; wrap those outputs in a ``Story" object (status + note).  
-- Build a lightweight dashboard that simulates sequences of runs and highlights where GAN-based decoders might fail, so the site can show a simulated caution before you commit to retraining fully.
+- Document the latent alignment pipeline from `Cheap2Rich.py`, flag the adjustable quantities (contrastive loss, gating strength, frequency attention contributions), and map them to an ODE-style latent drift.
+- Build a Julia simulation script that solves such an ODE, produces a `Story` summary (status, confidence, note), and dumps JSON artifacts for the dashboard.
+- Create a lightweight dashboard that simulates parameter sweeps, surfaces projected metric curves, and feeds those outputs into the personal site’s blog or research feeds.
+
+## Julia simulation prototype
+
+`scripts/sci_story.jl` is the first concrete step on this path. It:
+
+- Defines a simple latent ODE that mixes drift, gating, and oscillatory perturbations.
+- Solves it with `DifferentialEquations.jl` (calls `Tsit5()` with tight tolerances) and extracts a trajectory plus metadata.
+- Builds a story object (status, slope, confidence, note) so the experiment forecast is immediately human-readable.
+- Writes the trajectory + story payload to `artifacts/sci_story.json` so the personal site can consume it (or you can inspect it before generating plots).
+
+### Running the Julia simulation
+
+Ensure you have Julia installed and the dependencies available:
+
+```bash
+julia -e 'using Pkg; Pkg.add("DifferentialEquations"); Pkg.add("JSON")'
+julia scripts/sci_story.jl
+```
+
+This produces `artifacts/sci_story.json` with the trajectory and story summary. The file can be picked up by a dashboard or rendered directly on the personal site as a warning/insight block.
 
 ## What’s next
 
-- Sketch the core data flow (latent state → sim → story) in `doc/architecture.md`.  
-- Seed `scripts/initial_sim.py` (or a Julia notebook) with a toy differential equation mimicking latent drift plus a placeholder narrative generator.
-- Track outstanding questions in `TODO.md` and link to Jan’s personal site for eventual integration.
+- Analyze `Cheap2Rich.py` to translate the current latent alignment steps (contrastive projector, frequency attention gating, SINDy/Lasso) into the solver parameters.
+- Expand the narrative layer with metrics such as SSIM forecasts, gating energy, or risk levels.
+- Plan how the simulator should push artifacts (plots, JSON) back into `jan-personal-site` so the site can visualize that predictive story.

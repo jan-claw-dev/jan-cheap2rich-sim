@@ -21,3 +21,6 @@
 1. Run simulator with several parameter sets.  
 2. Save JSON artifacts/plots to `reports/` or `artifacts/` for the portfolio site to read.  
 3. Inject automated story summaries into the site’s blog or reading sections to explain what the simulation says about next experiments.
+
+## Prototype hook
+- `scripts/sci_story.jl` solves the toy latent ODE and creates the `artifacts/sci_story.json` payload described above, serving as the first story generator.
