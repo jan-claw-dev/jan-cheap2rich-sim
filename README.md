@@ -34,6 +34,24 @@ julia scripts/sci_story.jl
 
 This produces `artifacts/sci_story.json` with the trajectory and story summary. The file can be picked up by a dashboard or rendered directly on the personal site as a warning/insight block.
 
+## Contrastive story prototype
+
+`scripts/contrastive_story.py` builds on the contrastive aligner from `Cheap2Rich.py` to simulate how a projector reduces the gap between synthetic simulator latents and "real" measurements. It:
+
+- Generates paired latent batches (drift + noise) and treats the simulated vs. real codes as positive pairs.
+- Trains a two-layer contrastive projector similar to the `LatentContrastive` aligner, evaluating symmetric cross-entropy between projections.
+- Records loss history and a story payload (`gap_before`, `gap_after`, confidence, qualitative note) that captures how alignment progressed.
+- Dumps the payload to `artifacts/contrastive_story.json`, which can again feed your dashboard/blog with predicted status + confidence.
+
+### Running the contrastive prototype
+
+```bash
+python3 -m pip install torch==2.10.0+cpu numpy
+python3 scripts/contrastive_story.py
+```
+
+The script writes `artifacts/contrastive_story.json` with final gap metrics, loss history, and a short story note describing whether the projector is aligned or still calibrating.
+
 ## What’s next
 
 - Analyze `Cheap2Rich.py` to translate the current latent alignment steps (contrastive projector, frequency attention gating, SINDy/Lasso) into the solver parameters.

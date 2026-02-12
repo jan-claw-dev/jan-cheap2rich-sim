@@ -24,3 +24,4 @@
 
 ## Prototype hook
 - `scripts/sci_story.jl` solves the toy latent ODE and creates the `artifacts/sci_story.json` payload described above, serving as the first story generator.
+- `scripts/contrastive_story.py` trains a simplified contrastive projector on synthetic latents, records loss/gap metrics, and emits `artifacts/contrastive_story.json` so downstream dashboards can reference per-run confidence + action notes.
